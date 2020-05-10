@@ -2,13 +2,23 @@ package com.example.customviewdemo
 
 import android.content.Context
 import android.graphics.*
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.customviewdemo.R.dimen.black_key_height
 
-class PianoView(context: Context): View(context) {
+class PianoView: View {
 
+    constructor(context: Context): this(context, null)
+
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+
+    }
+
+    var listener: IKeyboardListener? = null
 
     private val whiteKeyStrokePaint: Paint by lazy {
         Paint().apply {
@@ -79,6 +89,12 @@ class PianoView(context: Context): View(context) {
     private fun drawWhiteKeys(canvas: Canvas?) {
         var left = 0f
         for (i in 0 until numOfWhiteKeys) {
+//            val notes = "CDEFGAB"
+//                var l = 0
+//                while (l < notes.length) {
+//                    whiteKeys[l].name = "${notes[l++]}${i+1}"
+//                }
+
             canvas?.drawRoundRect(left, 0f, left + whiteKeyWidth, whiteKeyHeight, keyRadius, keyRadius, whiteKeys[i].paint)
 
             val rect = whiteKeys[i].rect.let { it.left = left; it.top = 0f; it.right = left + whiteKeyWidth; it.bottom = whiteKeyHeight; it }
@@ -104,11 +120,13 @@ class PianoView(context: Context): View(context) {
     private fun pressKey(key: Key) {
         key.paint.color = if (key.isBlack) Color.DKGRAY else Color.GRAY
         invalidate()
+        listener?.keyOn(key)
     }
 
     private fun releaseKey(key: Key) {
         key.paint.color = if (key.isBlack) Color.BLACK else Color.WHITE
         invalidate()
+        listener?.keyOff(key)
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
@@ -132,6 +150,10 @@ class PianoView(context: Context): View(context) {
         return null
     }
 
-    data class Key(val rect: RectF, val paint: Paint, val isBlack: Boolean)
+    data class Key(val rect: RectF, val paint: Paint, val isBlack: Boolean, var name: String? = null)
 
+    interface IKeyboardListener {
+        fun keyOn(key: Key)
+        fun keyOff(key: Key)
+    }
 }
