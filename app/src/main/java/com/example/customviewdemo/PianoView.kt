@@ -10,6 +10,12 @@ import com.example.customviewdemo.R.dimen.black_key_height
 
 class PianoView : View {
 
+    private var whiteKeysColor = Color.WHITE
+    private var blackKeysColor = Color.BLACK
+
+    private lateinit var whiteKeys: Array<Key>
+    private lateinit var blackKeys: Array<Key>
+
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -19,8 +25,11 @@ class PianoView : View {
         attrs,
         defStyleAttr
     ) {
-
+        initAttr(attrs)
+        initKeys()
+        initKeyNames()
     }
+
 
     var listener: IKeyboardListener? = null
 
@@ -37,7 +46,7 @@ class PianoView : View {
         Paint().apply {
             strokeWidth = 2f
             style = Paint.Style.FILL_AND_STROKE
-            color = ContextCompat.getColor(context, R.color.black)
+            color = blackKeysColor
         }
     }
 
@@ -54,30 +63,8 @@ class PianoView : View {
     var keyRadius = 5f
     var keyRadiusToKeyWidthRatio = keyRadius.div(whiteKeyWidth)
 
-    val numOfWhiteKeys = 14
-    val numOfBlackKeys = 10
+    private val numOfWhiteKeys = 14
 
-    private val whiteKeys = Array(numOfWhiteKeys) {
-        Key(
-            RectF(),
-            Paint().apply { style = Paint.Style.FILL; color = Color.WHITE },
-            false
-        )
-    }
-    private val blackKeys = Array(numOfWhiteKeys) {
-        Key(
-            RectF(),
-            Paint().apply {
-                strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color =
-                ContextCompat.getColor(context, R.color.black)
-            },
-            true
-        )
-    }
-
-    init {
-        initKeyNames()
-    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -157,7 +144,7 @@ class PianoView : View {
     }
 
     private fun releaseKey(key: Key) {
-        key.paint.color = if (key.isBlack) Color.BLACK else Color.WHITE
+        key.paint.color = if (key.isBlack) blackKeysColor else whiteKeysColor
         invalidate()
         listener?.keyOff(key)
     }
@@ -189,6 +176,26 @@ class PianoView : View {
         return null
     }
 
+    private fun initKeys() {
+        whiteKeys = Array(numOfWhiteKeys) {
+            Key(
+                RectF(),
+                Paint().apply { style = Paint.Style.FILL; color = whiteKeysColor },
+                false
+            )
+        }
+        blackKeys = Array(numOfWhiteKeys) {
+            Key(
+                RectF(),
+                Paint().apply {
+                    strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color =
+                    blackKeysColor
+                },
+                true
+            )
+        }
+    }
+
     private fun initKeyNames() {
         //add key names
         var i = 0
@@ -202,6 +209,17 @@ class PianoView : View {
             }
             j++
             i = 0
+        }
+    }
+
+    private fun initAttr(attrs: AttributeSet?) {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.PianoView, 0, 0).apply {
+            try {
+                whiteKeysColor = getColor(R.styleable.PianoView_whiteKeysColor, whiteKeysColor)
+                blackKeysColor = getColor(R.styleable.PianoView_blackKeysColor, blackKeysColor)
+            } finally {
+                recycle() //TypedArray is a shared resource and must be recycled, it is for one time use.
+            }
         }
     }
 

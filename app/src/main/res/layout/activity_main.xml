@@ -14,7 +14,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:whiteKeysColor="@color/colorAccent"
+        app:blackKeysColor="@color/magenta"/>
 
     <TextView
         android:id="@+id/monitor"
@@ -22,7 +24,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorAccent"
         android:textSize="48sp"
-        android:text="Hello!"
+        android:text="@string/hello"
         android:textStyle="bold"
         android:padding="20dp"
         app:layout_constraintLeft_toLeftOf="parent"
