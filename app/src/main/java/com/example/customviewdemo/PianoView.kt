@@ -8,13 +8,17 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.customviewdemo.R.dimen.black_key_height
 
-class PianoView: View {
+class PianoView : View {
 
-    constructor(context: Context): this(context, null)
+    constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
 
     }
 
@@ -53,13 +57,33 @@ class PianoView: View {
     val numOfWhiteKeys = 14
     val numOfBlackKeys = 10
 
-    val whiteKeys = Array(numOfWhiteKeys) { Key(RectF(), Paint().apply { style = Paint.Style.FILL; color = Color.WHITE }, false) }
-    val blackKeys = Array(numOfWhiteKeys) { Key(RectF(), Paint().apply { strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color = ContextCompat.getColor(context, R.color.black) }, true) }
+    private val whiteKeys = Array(numOfWhiteKeys) {
+        Key(
+            RectF(),
+            Paint().apply { style = Paint.Style.FILL; color = Color.WHITE },
+            false
+        )
+    }
+    private val blackKeys = Array(numOfWhiteKeys) {
+        Key(
+            RectF(),
+            Paint().apply {
+                strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color =
+                ContextCompat.getColor(context, R.color.black)
+            },
+            true
+        )
+    }
+
+    init {
+        initKeyNames()
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
-        val givenWidth = MeasureSpec.getSize(widthMeasureSpec) //this gives us the width assigned to this view.
+        val givenWidth =
+            MeasureSpec.getSize(widthMeasureSpec) //this gives us the width assigned to this view.
 
         //we can adjust the key sizes to fit our given view width
         whiteKeyWidth = givenWidth.div(numOfWhiteKeys).toFloat()
@@ -89,15 +113,21 @@ class PianoView: View {
     private fun drawWhiteKeys(canvas: Canvas?) {
         var left = 0f
         for (i in 0 until numOfWhiteKeys) {
-//            val notes = "CDEFGAB"
-//                var l = 0
-//                while (l < notes.length) {
-//                    whiteKeys[l].name = "${notes[l++]}${i+1}"
-//                }
 
-            canvas?.drawRoundRect(left, 0f, left + whiteKeyWidth, whiteKeyHeight, keyRadius, keyRadius, whiteKeys[i].paint)
+            canvas?.drawRoundRect(
+                left,
+                0f,
+                left + whiteKeyWidth,
+                whiteKeyHeight,
+                keyRadius,
+                keyRadius,
+                whiteKeys[i].paint
+            )
 
-            val rect = whiteKeys[i].rect.let { it.left = left; it.top = 0f; it.right = left + whiteKeyWidth; it.bottom = whiteKeyHeight; it }
+            val rect = whiteKeys[i].rect.let {
+                it.left = left; it.top = 0f; it.right = left + whiteKeyWidth; it.bottom =
+                whiteKeyHeight; it
+            }
             canvas?.drawRoundRect(rect, keyRadius, keyRadius, whiteKeyStrokePaint)
 
             left += whiteKeyWidth - whiteKeyStrokePaint.strokeWidth.div(2)
@@ -107,7 +137,10 @@ class PianoView: View {
     private fun drawBlackKeys(canvas: Canvas?) {
         var left = whiteKeyWidth.div(2) + blackKeyPaint.strokeWidth
         for (i in 0 until numOfWhiteKeys) {
-            val rect = blackKeys[i].rect.let { it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom = blackKeyHeight; it }
+            val rect = blackKeys[i].rect.let {
+                it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
+                blackKeyHeight; it
+            }
             if (i == 2 || i == 6 || i == 9 || i == 13) {
                 left += whiteKeyWidth
                 continue
@@ -150,7 +183,28 @@ class PianoView: View {
         return null
     }
 
-    data class Key(val rect: RectF, val paint: Paint, val isBlack: Boolean, var name: String? = null)
+    private fun initKeyNames() {
+        //add key names
+        var i = 0
+        var j = 1
+        var k = 0
+        val s = "CDEFGAB"
+        while (j < 3) {
+            while (i < s.length) {
+                blackKeys[k].name = "${s[i]}#$j"
+                whiteKeys[k++].name = "${s[i++]}$j"
+            }
+            j++
+            i = 0
+        }
+    }
+
+    data class Key(
+        val rect: RectF,
+        val paint: Paint,
+        val isBlack: Boolean,
+        var name: String? = null
+    )
 
     interface IKeyboardListener {
         fun keyOn(key: Key)

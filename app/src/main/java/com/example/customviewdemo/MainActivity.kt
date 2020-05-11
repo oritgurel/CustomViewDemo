@@ -2,6 +2,7 @@ package com.example.customviewdemo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), PianoView.IKeyboardListener {
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity(), PianoView.IKeyboardListener {
 
     override fun keyOn(key: PianoView.Key) {
         monitor.text = key.name
+        monitor.setTextColor(ContextCompat.getColor(this, if (!key.isBlack) R.color.colorAccent else R.color.magenta))
     }
 
     override fun keyOff(key: PianoView.Key) {
