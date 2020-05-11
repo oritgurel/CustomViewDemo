@@ -162,11 +162,17 @@ class PianoView : View {
         listener?.keyOff(key)
     }
 
+    private var prevKey: Key? = null
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return super.onTouchEvent(event)
         val key = findKeyForTouch(event.x, event.y) ?: return true
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> pressKey(key)
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                prevKey?.let { releaseKey(it) }
+                prevKey = key
+                pressKey(key)
+            }
             MotionEvent.ACTION_UP -> releaseKey(key)
         }
         return true
