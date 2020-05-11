@@ -54,7 +54,7 @@ class PianoView : View {
     var whiteKeyHeight = resources.getDimension(R.dimen.white_key_height)
     val whiteKeyWidthHeightRatio = whiteKeyHeight.div(whiteKeyWidth)
 
-    var blackKeyWidth = resources.getDimension(R.dimen.black_key_width)
+    var blackKeyWidth = whiteKeyWidth.times(0.7f)
     var blackKeyHeight = resources.getDimension(black_key_height)
     val blackKeysWidthHeightRatio = blackKeyHeight.div(blackKeyWidth)
 
@@ -73,7 +73,7 @@ class PianoView : View {
             MeasureSpec.getSize(widthMeasureSpec) //this gives us the width assigned to this view.
 
         //we can adjust the key sizes to fit our given view width
-        whiteKeyWidth = givenWidth.div(numOfWhiteKeys).toFloat()
+        whiteKeyWidth = (givenWidth + numOfWhiteKeys.times(whiteKeyStrokePaint.strokeWidth.div(2))).div(numOfWhiteKeys).toFloat()
         whiteKeyHeight = whiteKeyWidth.times(whiteKeyWidthHeightRatio)
 
         blackKeyWidth = whiteKeyWidth.times(blackKeyToWhiteKeyWidthRatio)
@@ -122,7 +122,7 @@ class PianoView : View {
     }
 
     private fun drawBlackKeys(canvas: Canvas?) {
-        var left = whiteKeyWidth.div(2) + blackKeyPaint.strokeWidth
+        var left = whiteKeyWidth.div(1.7f) + blackKeyPaint.strokeWidth
         for (i in 0 until numOfWhiteKeys) {
             val rect = blackKeys[i].rect.let {
                 it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
