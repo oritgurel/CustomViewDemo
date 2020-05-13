@@ -10,8 +10,18 @@ import com.example.customviewdemo.R.dimen.black_key_height
 
 class PianoView : View {
 
-    private var whiteKeysColor = Color.WHITE
-    private var blackKeysColor = Color.BLACK
+    var whiteKeysColor = Color.WHITE
+        set(value) {
+            field = value
+            initKeys()
+            invalidate()
+        }
+    var blackKeysColor = Color.BLACK
+        set(value) {
+            field = value
+            initKeys()
+            invalidate()
+        }
 
     private lateinit var whiteKeys: Array<Key>
     private lateinit var blackKeys: Array<Key>
@@ -50,18 +60,19 @@ class PianoView : View {
         }
     }
 
-    var whiteKeyWidth = resources.getDimension(R.dimen.white_key_width)
-    var whiteKeyHeight = resources.getDimension(R.dimen.white_key_height)
-    val whiteKeyWidthHeightRatio = whiteKeyHeight.div(whiteKeyWidth)
 
-    var blackKeyWidth = whiteKeyWidth.times(0.7f)
-    var blackKeyHeight = resources.getDimension(black_key_height)
-    val blackKeysWidthHeightRatio = blackKeyHeight.div(blackKeyWidth)
+    private var whiteKeyWidth = resources.getDimension(R.dimen.white_key_width)
+    private var whiteKeyHeight = resources.getDimension(R.dimen.white_key_height)
+    private val whiteKeyWidthHeightRatio = whiteKeyHeight.div(whiteKeyWidth)
 
-    val blackKeyToWhiteKeyWidthRatio = blackKeyWidth.div(whiteKeyWidth)
+    private var blackKeyWidth = whiteKeyWidth.times(0.7f)
+    private var blackKeyHeight = resources.getDimension(black_key_height)
+    private val blackKeysWidthHeightRatio = blackKeyHeight.div(blackKeyWidth)
 
-    var keyRadius = 5f
-    var keyRadiusToKeyWidthRatio = keyRadius.div(whiteKeyWidth)
+    private val blackKeyToWhiteKeyWidthRatio = blackKeyWidth.div(whiteKeyWidth)
+
+    private var keyRadius = 5f
+    private var keyRadiusToKeyWidthRatio = keyRadius.div(whiteKeyWidth)
 
     private val numOfWhiteKeys = 14
 

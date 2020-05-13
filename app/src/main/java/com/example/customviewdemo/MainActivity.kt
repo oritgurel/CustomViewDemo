@@ -7,11 +7,22 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), PianoView.IKeyboardListener {
 
+    var toggle: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         keyboard_view.listener = this
+
+        toggle_theme_btn.setOnClickListener {
+            keyboard_view.apply {
+                whiteKeysColor = ContextCompat.getColor(this@MainActivity, if (toggle) R.color.colorAccent else R.color.white)
+                blackKeysColor = ContextCompat.getColor(this@MainActivity, if (toggle) R.color.yellow else R.color.black)
+                toggle = !toggle
+            }
+
+        }
     }
 
     override fun keyOn(key: PianoView.Key) {
