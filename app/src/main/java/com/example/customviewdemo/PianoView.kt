@@ -47,7 +47,7 @@ class PianoView : View {
         Paint().apply {
             strokeWidth = 2f
             style = Paint.Style.STROKE
-
+            isAntiAlias = true //makes edges more smooth!
             color = ContextCompat.getColor(context, R.color.black)
         }
     }
