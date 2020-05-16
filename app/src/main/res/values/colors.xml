@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="black">#000000</color>
+    <color name="magenta">#ff3399</color>
+    <color name="white">#FFFFFF</color>
+    <color name="yellow">#f2fa0c</color>
+    <color name="yellow_trans_50">#80f2fa0c</color>
 </resources>

@@ -2,19 +2,52 @@ package com.example.customviewdemo
 
 import android.content.Context
 import android.graphics.*
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.example.customviewdemo.R.dimen.black_key_height
 
-class PianoView(context: Context): View(context) {
+class PianoView : View {
 
+    var whiteKeysColor = Color.WHITE
+        set(value) {
+            field = value
+            initKeys()
+            invalidate()
+        }
+    var blackKeysColor = Color.BLACK
+        set(value) {
+            field = value
+            initKeys()
+            invalidate()
+        }
+
+    private lateinit var whiteKeys: Array<Key>
+    private lateinit var blackKeys: Array<Key>
+
+    constructor(context: Context) : this(context, null)
+
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
+
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
+        initAttr(attrs)
+        initKeys()
+        initKeyNames()
+    }
+
+
+    var listener: IKeyboardListener? = null
 
     private val whiteKeyStrokePaint: Paint by lazy {
         Paint().apply {
             strokeWidth = 2f
             style = Paint.Style.STROKE
-
+            isAntiAlias = true //makes edges more smooth!
             color = ContextCompat.getColor(context, R.color.black)
         }
     }
@@ -23,36 +56,35 @@ class PianoView(context: Context): View(context) {
         Paint().apply {
             strokeWidth = 2f
             style = Paint.Style.FILL_AND_STROKE
-            color = ContextCompat.getColor(context, R.color.black)
+            color = blackKeysColor
         }
     }
 
-    var whiteKeyWidth = resources.getDimension(R.dimen.white_key_width)
-    var whiteKeyHeight = resources.getDimension(R.dimen.white_key_height)
-    val whiteKeyWidthHeightRatio = whiteKeyHeight.div(whiteKeyWidth)
 
-    var blackKeyWidth = resources.getDimension(R.dimen.black_key_width)
-    var blackKeyHeight = resources.getDimension(black_key_height)
-    val blackKeysWidthHeightRatio = blackKeyHeight.div(blackKeyWidth)
+    private var whiteKeyWidth = resources.getDimension(R.dimen.white_key_width)
+    private var whiteKeyHeight = resources.getDimension(R.dimen.white_key_height)
+    private val whiteKeyWidthHeightRatio = whiteKeyHeight.div(whiteKeyWidth)
 
-    val blackKeyToWhiteKeyWidthRatio = blackKeyWidth.div(whiteKeyWidth)
+    private var blackKeyWidth = whiteKeyWidth.times(0.7f)
+    private var blackKeyHeight = resources.getDimension(black_key_height)
+    private val blackKeysWidthHeightRatio = blackKeyHeight.div(blackKeyWidth)
 
-    var keyRadius = 5f
-    var keyRadiusToKeyWidthRatio = keyRadius.div(whiteKeyWidth)
+    private val blackKeyToWhiteKeyWidthRatio = blackKeyWidth.div(whiteKeyWidth)
 
-    val numOfWhiteKeys = 14
-    val numOfBlackKeys = 10
+    private var keyRadius = 5f
+    private var keyRadiusToKeyWidthRatio = keyRadius.div(whiteKeyWidth)
 
-    val whiteKeys = Array(numOfWhiteKeys) { Key(RectF(), Paint().apply { style = Paint.Style.FILL; color = Color.WHITE }, false) }
-    val blackKeys = Array(numOfWhiteKeys) { Key(RectF(), Paint().apply { strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color = ContextCompat.getColor(context, R.color.black) }, true) }
+    private val numOfWhiteKeys = 14
+
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
-        val givenWidth = MeasureSpec.getSize(widthMeasureSpec) //this gives us the width assigned to this view.
+        val givenWidth =
+            MeasureSpec.getSize(widthMeasureSpec) //this gives us the width assigned to this view.
 
         //we can adjust the key sizes to fit our given view width
-        whiteKeyWidth = givenWidth.div(numOfWhiteKeys).toFloat()
+        whiteKeyWidth = (givenWidth + numOfWhiteKeys.times(whiteKeyStrokePaint.strokeWidth.div(2))).div(numOfWhiteKeys).toFloat()
         whiteKeyHeight = whiteKeyWidth.times(whiteKeyWidthHeightRatio)
 
         blackKeyWidth = whiteKeyWidth.times(blackKeyToWhiteKeyWidthRatio)
@@ -79,9 +111,21 @@ class PianoView(context: Context): View(context) {
     private fun drawWhiteKeys(canvas: Canvas?) {
         var left = 0f
         for (i in 0 until numOfWhiteKeys) {
-            canvas?.drawRoundRect(left, 0f, left + whiteKeyWidth, whiteKeyHeight, keyRadius, keyRadius, whiteKeys[i].paint)
 
-            val rect = whiteKeys[i].rect.let { it.left = left; it.top = 0f; it.right = left + whiteKeyWidth; it.bottom = whiteKeyHeight; it }
+            canvas?.drawRoundRect(
+                left,
+                0f,
+                left + whiteKeyWidth,
+                whiteKeyHeight,
+                keyRadius,
+                keyRadius,
+                whiteKeys[i].paint
+            )
+
+            val rect = whiteKeys[i].rect.let {
+                it.left = left; it.top = 0f; it.right = left + whiteKeyWidth; it.bottom =
+                whiteKeyHeight; it
+            }
             canvas?.drawRoundRect(rect, keyRadius, keyRadius, whiteKeyStrokePaint)
 
             left += whiteKeyWidth - whiteKeyStrokePaint.strokeWidth.div(2)
@@ -89,9 +133,12 @@ class PianoView(context: Context): View(context) {
     }
 
     private fun drawBlackKeys(canvas: Canvas?) {
-        var left = whiteKeyWidth.div(2) + blackKeyPaint.strokeWidth
+        var left = whiteKeyWidth.div(1.7f) + blackKeyPaint.strokeWidth
         for (i in 0 until numOfWhiteKeys) {
-            val rect = blackKeys[i].rect.let { it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom = blackKeyHeight; it }
+            val rect = blackKeys[i].rect.let {
+                it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
+                blackKeyHeight; it
+            }
             if (i == 2 || i == 6 || i == 9 || i == 13) {
                 left += whiteKeyWidth
                 continue
@@ -104,18 +151,26 @@ class PianoView(context: Context): View(context) {
     private fun pressKey(key: Key) {
         key.paint.color = if (key.isBlack) Color.DKGRAY else Color.GRAY
         invalidate()
+        listener?.keyOn(key)
     }
 
     private fun releaseKey(key: Key) {
-        key.paint.color = if (key.isBlack) Color.BLACK else Color.WHITE
+        key.paint.color = if (key.isBlack) blackKeysColor else whiteKeysColor
         invalidate()
+        listener?.keyOff(key)
     }
+
+    private var prevKey: Key? = null
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event == null) return super.onTouchEvent(event)
         val key = findKeyForTouch(event.x, event.y) ?: return true
         when (event.action) {
-            MotionEvent.ACTION_DOWN -> pressKey(key)
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
+                prevKey?.let { releaseKey(it) }
+                prevKey = key
+                pressKey(key)
+            }
             MotionEvent.ACTION_UP -> releaseKey(key)
         }
         return true
@@ -132,6 +187,62 @@ class PianoView(context: Context): View(context) {
         return null
     }
 
-    data class Key(val rect: RectF, val paint: Paint, val isBlack: Boolean)
+    private fun initKeys() {
+        whiteKeys = Array(numOfWhiteKeys) {
+            Key(
+                RectF(),
+                Paint().apply { style = Paint.Style.FILL; color = whiteKeysColor },
+                false
+            )
+        }
+        blackKeys = Array(numOfWhiteKeys) {
+            Key(
+                RectF(),
+                Paint().apply {
+                    strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color =
+                    blackKeysColor
+                },
+                true
+            )
+        }
+    }
 
+    private fun initKeyNames() {
+        //add key names
+        var i = 0
+        var j = 1
+        var k = 0
+        val s = "CDEFGAB"
+        while (j < 3) {
+            while (i < s.length) {
+                blackKeys[k].name = "${s[i]}#$j"
+                whiteKeys[k++].name = "${s[i++]}$j"
+            }
+            j++
+            i = 0
+        }
+    }
+
+    private fun initAttr(attrs: AttributeSet?) {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.PianoView, 0, 0).apply {
+            try {
+                whiteKeysColor = getColor(R.styleable.PianoView_whiteKeysColor, whiteKeysColor)
+                blackKeysColor = getColor(R.styleable.PianoView_blackKeysColor, blackKeysColor)
+            } finally {
+                recycle() //TypedArray is a shared resource and must be recycled, it is for one time use.
+            }
+        }
+    }
+
+    data class Key(
+        val rect: RectF,
+        val paint: Paint,
+        val isBlack: Boolean,
+        var name: String? = null
+    )
+
+    interface IKeyboardListener {
+        fun keyOn(key: Key)
+        fun keyOff(key: Key)
+    }
 }
