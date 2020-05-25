@@ -135,13 +135,13 @@ class PianoView : View {
     private fun drawBlackKeys(canvas: Canvas?) {
         var left = paddingLeft + whiteKeyWidth.div(1.7f) + blackKeyPaint.strokeWidth
         for (i in 0 until numOfWhiteKeys) {
-            val rect = blackKeys[i].rect.let {
-                it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
-                blackKeyHeight; it
-            }
             if (i == 2 || i == 6 || i == 9 || i == 13) {
                 left += whiteKeyWidth
                 continue
+            }
+            val rect = blackKeys[i].rect.let {
+                it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
+                blackKeyHeight; it
             }
             canvas?.drawRoundRect(rect, keyRadius, keyRadius, blackKeys[i].paint)
             left += whiteKeyWidth - blackKeyPaint.strokeWidth.div(2)
