@@ -146,15 +146,11 @@ class PianoView : View {
             }
 
             canvas?.let {
-                val save = it.save()
                 blackKeys[i].path?.apply {
                     reset()
                     addRoundRect(rect, keyRadius, keyRadius, Path.Direction.CW); close()
-                    it.clipPath(this)
                     it.drawPath(this, blackKeys[i].paint)
                 }
-
-                it.restoreToCount(save)
             }
 
             left += whiteKeyWidth - blackKeyPaint.strokeWidth.div(2)
