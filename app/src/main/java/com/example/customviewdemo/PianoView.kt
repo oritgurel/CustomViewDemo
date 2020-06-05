@@ -196,21 +196,24 @@ class PianoView : View {
         tempPath.moveTo(x, y)
         val rect = RectF(x-1, y-1, x+1, y+1)
         tempPath.addRect(rect, Path.Direction.CW)
-        blackKeys.forEach {
-            tempPath.op(it.path, Path.Op.DIFFERENCE)
-            if (tempPath.isEmpty) {
-                tempPath.reset()
-                return it
+        try {
+            blackKeys.forEach {
+                tempPath.op(it.path, Path.Op.DIFFERENCE)
+                if (tempPath.isEmpty) {
+
+                    return it
+                }
             }
-        }
-        whiteKeys.forEach {
-            if (it.rect.contains(x, y)) {
-                tempPath.reset()
-                return it
+            whiteKeys.forEach {
+                if (it.rect.contains(x, y)) {
+
+                    return it
+                }
             }
+            return null
+        } finally {
+            tempPath.reset()
         }
-        tempPath.reset()
-        return null
     }
 
     private fun initKeys() {
