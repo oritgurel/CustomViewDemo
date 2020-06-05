@@ -106,6 +106,7 @@ class PianoView : View {
 
         drawWhiteKeys(canvas)
         drawBlackKeys(canvas)
+
     }
 
     private fun drawWhiteKeys(canvas: Canvas?) {
@@ -143,7 +144,19 @@ class PianoView : View {
                 it.left = left; it.top = 0f; it.right = left + blackKeyWidth; it.bottom =
                 blackKeyHeight; it
             }
-            canvas?.drawRoundRect(rect, keyRadius, keyRadius, blackKeys[i].paint)
+
+            canvas?.let {
+                val save = it.save()
+                blackKeys[i].path?.apply {
+                    reset()
+                    addRoundRect(rect, keyRadius, keyRadius, Path.Direction.CW); close()
+                    it.clipPath(this)
+                    it.drawPath(this, blackKeys[i].paint)
+                }
+
+                it.restoreToCount(save)
+            }
+
             left += whiteKeyWidth - blackKeyPaint.strokeWidth.div(2)
         }
     }
@@ -176,14 +189,27 @@ class PianoView : View {
         return true
     }
 
+    private val tempPath = Path()
+
     private fun findKeyForTouch(x: Float, y: Float): Key? {
         //single touch
+        tempPath.moveTo(x, y)
+        val rect = RectF(x-1, y-1, x+1, y+1)
+        tempPath.addRect(rect, Path.Direction.CW)
         blackKeys.forEach {
-            if (it.rect.contains(x, y)) return it
+            tempPath.op(it.path, Path.Op.DIFFERENCE)
+            if (tempPath.isEmpty) {
+                tempPath.reset()
+                return it
+            }
         }
         whiteKeys.forEach {
-            if (it.rect.contains(x, y)) return it
+            if (it.rect.contains(x, y)) {
+                tempPath.reset()
+                return it
+            }
         }
+        tempPath.reset()
         return null
     }
 
@@ -202,7 +228,8 @@ class PianoView : View {
                     strokeWidth = 2f; style = Paint.Style.FILL_AND_STROKE; color =
                     blackKeysColor
                 },
-                true
+                true,
+                Path()
             )
         }
     }
@@ -238,6 +265,7 @@ class PianoView : View {
         val rect: RectF,
         val paint: Paint,
         val isBlack: Boolean,
+        val path: Path? = null,
         var name: String? = null
     )
 
