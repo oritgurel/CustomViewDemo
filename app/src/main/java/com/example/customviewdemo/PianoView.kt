@@ -200,16 +200,16 @@ class PianoView : View {
             blackKeys.forEach {
                 tempPath.op(it.path, Path.Op.DIFFERENCE)
                 if (tempPath.isEmpty) {
-
+                    //touch is inside the key rect path
                     return it
                 }
             }
             whiteKeys.forEach {
                 if (it.rect.contains(x, y)) {
-
                     return it
                 }
             }
+            //touch is outside key path / rect
             return null
         } finally {
             tempPath.reset()
